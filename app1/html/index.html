@@ -1,0 +1,42 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Dev for Citizen デモ</title>
+</head>
+
+<!-- ODQLの実行にはjqueryが必要となります-->
+<script src="http://code.jquery.com/jquery-2.0.2.js"></script>
+<!-- ODQLにアクセスするためには、以下のファイルをインポートして下さい.-->
+<script src="http://www.data4citizen.jp/app/developer/code/js/odql.js"></script>
+
+<!-- Bootstrap -->
+<link href="../css/bootstrap.css" rel="stylesheet">
+
+<body>
+<form name="js">
+<input type="text" name="txtb" maxlength="10" value=""><br>
+<input type="button" value="表示" onclick="tbox1()"><br>
+</form>
+
+<script>
+
+//テキストボックスの文字を取得する
+function tbox1(){
+
+  var str1=document.js.txtb.value;
+ alert("SELECT start_date, end_date, start_time, end_time, title, description, bosyu_start, bosyu_end, bosyu_description, link, place, x, y, contact FROM o_aizu_event WHERE start_date = '" + str1 + "'");
+
+	//ODQLを以下のように記述し、ODQLLoader.loadOpenDataを利用して下さい.
+		var data = {
+				odql : "SELECT start_date, end_date, start_time, end_time, title, description, bosyu_start, bosyu_end, bosyu_description, link, place, x, y, contact FROM o_aizu_event WHERE start_date = '" + str1 + "'"
+		};
+
+		var jsonData = ODQLLoader.loadOpenData(data);
+		alert(JSON.stringify(jsonData));
+
+}
+
+
+</script>
+</body>
+</html>
