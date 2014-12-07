@@ -17,26 +17,92 @@
 <input type="text" name="txtb" maxlength="10" value=""><br>
 <input type="button" value="表示" onclick="tbox1()"><br>
 </form>
+ <table class="table" id="output">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>開始日</th>
+      <th>終了日</th>
+      <th>開始時間</th>
+      <th>終了時間</th>
+      <th>タイトル</th>
+      <th>内容</th>
+      <th>募集開始日</th>
+      <th>募集終了日</th>
+      <th>募集要項</th>
+      <th>関連リンク</th>
+      <th>場所</th>
+      <th>地図</th>
+      <th>問い合わせ先</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
 
 <script>
 
 //テキストボックスの文字を取得する
 function tbox1(){
 
-  var str1=document.js.txtb.value;
- alert("SELECT start_date, end_date, start_time, end_time, title, description, bosyu_start, bosyu_end, bosyu_description, link, place, x, y, contact FROM o_aizu_event WHERE start_date = '" + str1 + "'");
+  var str1 = document.js.txtb.value;
+  var sql =
+	"SELECT "+
+	" start_date, "+
+	" end_date, "+
+	" start_time, "+
+	" end_time, "+
+	" title, "+
+	" description, "+
+	" bosyu_start, "+
+	" bosyu_end, "+
+	" bosyu_description, "+
+	" link, "+
+	" place, "+
+	" x, "+
+	" y, "+
+	" contact "+
+	"FROM o_aizu_event  "+
+	" WHERE start_date <= '" + str1 + "' AND end_date >= '" + str1 + "'";
+
+ alert(sql);
 
 	//ODQLを以下のように記述し、ODQLLoader.loadOpenDataを利用して下さい.
-		var data = {
-				odql : "SELECT start_date, end_date, start_time, end_time, title, description, bosyu_start, bosyu_end, bosyu_description, link, place, x, y, contact FROM o_aizu_event WHERE start_date = '" + str1 + "'"
-		};
+	var data = {
+			odql : sql
+	};
 
-		var jsonData = ODQLLoader.loadOpenData(data);
-		alert(JSON.stringify(jsonData));
+	var jsonData = ODQLLoader.loadOpenData(data);
+	alert(JSON.stringify(jsonData));
+	for(var i in jsonData.data){
 
+		var nm = parseInt(i) + 1;
+
+	 	$("#output").append(
+	    "<tr>" +
+	      "<td>" + nm + "</td>" +
+	      "<td>"+ jsonData.data[i].start_date + "</td>"+
+	      "<td>"+ jsonData.data[i].end_date +"</td>"+
+	      "<td>"+ jsonData.data[i].start_time +"</td>"+
+	      "<td>"+ jsonData.data[i].end_time +"</td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].title,"#nr#","<br>") +"</td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].description,"#nr#","<br>") +"</td>"+
+	      "<td>"+ jsonData.data[i].bosyu_start +"</td>"+
+	      "<td>"+ jsonData.data[i].bosyu_end +"</td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].bosyu_description,"#nr#","<br>") +"</td>"+
+	      "<td><a href="+ jsonData.data[i].link + " target=\"_blank\">リンク</a></td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].place,"#nr#","<br>") +"</td>"+
+	      "<td>"+ jsonData.data[i].x + "<br>" + jsonData.data[i].y +"</td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].contact,"#nr#","<br>") +"</td>"+
+	    "</tr>");
+
+	}
 }
 
-
+//全ての文字列 s1 を s2 に置き換える
+function replaceAll(expression, s1, s2){
+    return expression.split(s1).join(s2);
+}
 </script>
 </body>
 </html>
