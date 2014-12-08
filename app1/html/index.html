@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Dev for Citizen デモ</title>
+<title>会津若松市行事予定表</title>
 </head>
 
 <!-- ODQLの実行にはjqueryが必要となります-->
@@ -12,6 +12,8 @@
 <!-- Bootstrap -->
 <link href="../css/bootstrap.css" rel="stylesheet">
 
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true_or_false"></script>
+
 <body>
 <form name="js">
 <input type="text" name="txtb" maxlength="10" value=""><br>
@@ -21,15 +23,15 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>開始日</th>
-      <th>終了日</th>
-      <th>開始時間</th>
-      <th>終了時間</th>
+      <th>開始日<br>
+          終了日</th>
+      <th>開始時間<br>
+          終了時間</th>
       <th>タイトル</th>
       <th>内容</th>
-      <th>募集開始日</th>
-      <th>募集終了日</th>
-      <th>募集要項</th>
+    <!--   <th>募集開始日<br>
+          募集終了日</th>
+      <th>募集要項</th> -->
       <th>関連リンク</th>
       <th>場所</th>
       <th>地図</th>
@@ -39,7 +41,18 @@
   <tbody>
   </tbody>
 </table>
+    	<div class="container">
+		<!-- panelを設定 -->
+		<div class="panel panel-info">
+			<div class="panel-body">
+				<div id="gmap" style="width: 100%; height: 78%; border: 1px solid Gray;"></div>
+			</div>
+		</div>
 
+	</div>
+			<div class="panel-footer">
+				このアプリは<a href="http://www.data4citizen.jp/app/users/openDataTop/show/o_aizu_event">(会津若松市行事予定表)</a>を使用しています。
+			</div>
 <script>
 
 //テキストボックスの文字を取得する
@@ -74,6 +87,7 @@ function tbox1(){
 
 	var jsonData = ODQLLoader.loadOpenData(data);
 	alert(JSON.stringify(jsonData));
+
 	for(var i in jsonData.data){
 
 		var nm = parseInt(i) + 1;
@@ -81,15 +95,12 @@ function tbox1(){
 	 	$("#output").append(
 	    "<tr>" +
 	      "<td>" + nm + "</td>" +
-	      "<td>"+ jsonData.data[i].start_date + "</td>"+
-	      "<td>"+ jsonData.data[i].end_date +"</td>"+
-	      "<td>"+ jsonData.data[i].start_time +"</td>"+
-	      "<td>"+ jsonData.data[i].end_time +"</td>"+
+	      "<td>"+ jsonData.data[i].start_date + "<br>" + jsonData.data[i].end_date + "</td>"+
+	      "<td>"+ jsonData.data[i].start_time + "<br>" + jsonData.data[i].end_time +"</td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].title,"#nr#","<br>") +"</td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].description,"#nr#","<br>") +"</td>"+
-	      "<td>"+ jsonData.data[i].bosyu_start +"</td>"+
-	      "<td>"+ jsonData.data[i].bosyu_end +"</td>"+
-	      "<td>"+ replaceAll(jsonData.data[i].bosyu_description,"#nr#","<br>") +"</td>"+
+/* 	      "<td>"+ jsonData.data[i].bosyu_start + "<br>" + jsonData.data[i].bosyu_end  +"</td>"+
+	      "<td>"+ replaceAll(jsonData.data[i].bosyu_description,"#nr#","<br>") +"</td>"+ */
 	      "<td><a href="+ jsonData.data[i].link + " target=\"_blank\">リンク</a></td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].place,"#nr#","<br>") +"</td>"+
 	      "<td>"+ jsonData.data[i].x + "<br>" + jsonData.data[i].y +"</td>"+
@@ -103,6 +114,52 @@ function tbox1(){
 function replaceAll(expression, s1, s2){
     return expression.split(s1).join(s2);
 }
+var mapObj;
+var jsonData;
+var currentWindow = null;
+   google.maps.event.addDomListener(window, 'load', function()
+   {
+       // 初期表示用の座標（会津若松市役所）
+   	var lng = 139.92968559265137;
+       var lat = 37.49484774585197;
+
+       // 地図の表示オプションを指定
+       var mapOptions = {
+           zoom: 16,
+           center: new google.maps.LatLng(lat, lng),
+           mapTypeId: google.maps.MapTypeId.ROADMAP,
+           scaleControl: true
+       };
+
+       // mapインスタンスの作成
+       mapObj = new google.maps.Map(document.getElementById('gmap'), mapOptions);
+
+       // ODQLでトレイ位置情報を取得（緯度・経度情報がnullのものは取得しない）
+       jsonData = getAllToilets();
+
+   	// 取得したトイレ位置情報を地図上にマーカーする
+   	for(var i=0;i<jsonData.data.length;i++){
+   		createMarker(jsonData.data[i], mapObj);
+   	}
+   });
+
+   function createMarker(data, mapObj){
+   	var infoWindow = new google.maps.InfoWindow({
+   		content:getContentString(data)
+   	});
+   	var marker = new google.maps.Marker({
+   		position: new google.maps.LatLng(data.latitude, data.longitude),
+   		map: mapObj,
+   		title: data.name
+   	});
+   	google.maps.event.addListener(marker, 'click', function() {
+   		if (currentWindow) {
+   			currentWindow.close;
+   		}
+   		currentWindow = infoWindow;
+   		infoWindow.open(mapObj, marker);
+   	});
+   }
 </script>
 </body>
 </html>
