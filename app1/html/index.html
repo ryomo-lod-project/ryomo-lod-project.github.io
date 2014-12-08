@@ -41,18 +41,13 @@
   <tbody>
   </tbody>
 </table>
-    	<div class="container">
-		<!-- panelを設定 -->
-		<div class="panel panel-info">
-			<div class="panel-body">
-				<div id="gmap" style="width: 100%; height: 78%; border: 1px solid Gray;"></div>
-			</div>
-		</div>
 
-	</div>
-			<div class="panel-footer">
-				このアプリは<a href="http://www.data4citizen.jp/app/users/openDataTop/show/o_aizu_event">(会津若松市行事予定表)</a>を使用しています。
-			</div>
+<div id="gmap" style="width: 50%; height: 50%; border: 1px solid Gray;"></div>
+
+<div class="panel-footer">
+	このアプリは<a href="http://www.data4citizen.jp/app/users/openDataTop/show/o_aizu_event">(会津若松市行事予定表)</a>を使用しています。<br>
+    <a rel="license" href="http://creativecommons.org/licenses/by/2.1/jp/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by/2.1/jp/80x15.png" /></a>
+</div>
 <script>
 
 //テキストボックスの文字を取得する
@@ -78,7 +73,7 @@ function tbox1(){
 	"FROM o_aizu_event  "+
 	" WHERE start_date <= '" + str1 + "' AND end_date >= '" + str1 + "'";
 
- alert(sql);
+ //alert(sql);
 
 	//ODQLを以下のように記述し、ODQLLoader.loadOpenDataを利用して下さい.
 	var data = {
@@ -86,7 +81,7 @@ function tbox1(){
 	};
 
 	var jsonData = ODQLLoader.loadOpenData(data);
-	alert(JSON.stringify(jsonData));
+	//alert(JSON.stringify(jsonData));
 
 	for(var i in jsonData.data){
 
@@ -103,10 +98,11 @@ function tbox1(){
 	      "<td>"+ replaceAll(jsonData.data[i].bosyu_description,"#nr#","<br>") +"</td>"+ */
 	      "<td><a href="+ jsonData.data[i].link + " target=\"_blank\">リンク</a></td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].place,"#nr#","<br>") +"</td>"+
-	      "<td>"+ jsonData.data[i].x + "<br>" + jsonData.data[i].y +"</td>"+
+	      "<td><input type=\"button\" value=\"地図\" onclick=\"drawMap("
+	    		  + jsonData.data[i].y + ","
+	    		  + jsonData.data[i].x + ")\"/></td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].contact,"#nr#","<br>") +"</td>"+
 	    "</tr>");
-
 	}
 }
 
@@ -114,52 +110,24 @@ function tbox1(){
 function replaceAll(expression, s1, s2){
     return expression.split(s1).join(s2);
 }
-var mapObj;
-var jsonData;
-var currentWindow = null;
-   google.maps.event.addDomListener(window, 'load', function()
-   {
-       // 初期表示用の座標（会津若松市役所）
-   	var lng = 139.92968559265137;
-       var lat = 37.49484774585197;
 
-       // 地図の表示オプションを指定
-       var mapOptions = {
-           zoom: 16,
-           center: new google.maps.LatLng(lat, lng),
-           mapTypeId: google.maps.MapTypeId.ROADMAP,
-           scaleControl: true
-       };
+//地図の描画
+function drawMap(lng,lat,place) {
+	var latlng = new google.maps.LatLng(lng,lat );
+	var myOptions = {
+		zoom : 16,
+		center : latlng,
+		mapTypeId : google.maps.MapTypeId.ROADMAP
+	};
+	var map = new google.maps.Map(document.getElementById('gmap'),
+			myOptions);
 
-       // mapインスタンスの作成
-       mapObj = new google.maps.Map(document.getElementById('gmap'), mapOptions);
+	var marker = new google.maps.Marker({
+		position : latlng,
+		map : map
+	});
+}
 
-       // ODQLでトレイ位置情報を取得（緯度・経度情報がnullのものは取得しない）
-       jsonData = getAllToilets();
-
-   	// 取得したトイレ位置情報を地図上にマーカーする
-   	for(var i=0;i<jsonData.data.length;i++){
-   		createMarker(jsonData.data[i], mapObj);
-   	}
-   });
-
-   function createMarker(data, mapObj){
-   	var infoWindow = new google.maps.InfoWindow({
-   		content:getContentString(data)
-   	});
-   	var marker = new google.maps.Marker({
-   		position: new google.maps.LatLng(data.latitude, data.longitude),
-   		map: mapObj,
-   		title: data.name
-   	});
-   	google.maps.event.addListener(marker, 'click', function() {
-   		if (currentWindow) {
-   			currentWindow.close;
-   		}
-   		currentWindow = infoWindow;
-   		infoWindow.open(mapObj, marker);
-   	});
-   }
 </script>
 </body>
 </html>
