@@ -16,10 +16,12 @@
 
 <body>
 <form name="js">
-<input type="text" name="txtb" maxlength="10" value=""><br>
-<input type="button" value="表示" onclick="tbox1()"><br>
+<label>検索したい開催日を入力してください。<br>
+<input type="text" name="txtb" maxlength="10" value="" ><br>
+<input type="button" value="表示" onclick="srch()"><br>
+</label>
 </form>
- <table class="table" id="output">
+ <table class="table" id="output" style="width: 80%;">
   <thead>
     <tr>
       <th>#</th>
@@ -40,9 +42,9 @@
   </thead>
   <tbody>
   </tbody>
-</table>
+</table><div Align="left" id="gmap" style="width: 50%; height: 50%; border: 1px solid Gray;"></div>
 
-<div id="gmap" style="width: 50%; height: 50%; border: 1px solid Gray;"></div>
+
 
 <div class="panel-footer">
 	このアプリは<a href="http://www.data4citizen.jp/app/users/openDataTop/show/o_aizu_event">(会津若松市行事予定表)</a>を使用しています。<br>
@@ -50,10 +52,15 @@
 </div>
 <script>
 
-//テキストボックスの文字を取得する
-function tbox1(){
+//情報取得と描画を行う
+function srch(){
 
   var str1 = document.js.txtb.value;
+  if(str1 == ''){
+	  alert("日付を入力してください。");
+	  return;
+  }
+
   var sql =
 	"SELECT "+
 	" start_date, "+
@@ -87,6 +94,13 @@ function tbox1(){
 
 		var nm = parseInt(i) + 1;
 
+		//リンク
+		var link = '';
+		if(jsonData.data[i].link != '')
+		{
+			link =  "<a href="+ jsonData.data[i].link + " target=\"_blank\">リンク</a>";
+		}
+
 	 	$("#output").append(
 	    "<tr>" +
 	      "<td>" + nm + "</td>" +
@@ -96,13 +110,18 @@ function tbox1(){
 	      "<td>"+ replaceAll(jsonData.data[i].description,"#nr#","<br>") +"</td>"+
 /* 	      "<td>"+ jsonData.data[i].bosyu_start + "<br>" + jsonData.data[i].bosyu_end  +"</td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].bosyu_description,"#nr#","<br>") +"</td>"+ */
-	      "<td><a href="+ jsonData.data[i].link + " target=\"_blank\">リンク</a></td>"+
+	      "<td>"+ link + "</td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].place,"#nr#","<br>") +"</td>"+
 	      "<td><input type=\"button\" value=\"地図\" onclick=\"drawMap("
 	    		  + jsonData.data[i].y + ","
-	    		  + jsonData.data[i].x + ")\"/></td>"+
+	    		  + jsonData.data[i].x + ","
+	    		  + "'map" + nm + "')\"/></td>"+
 	      "<td>"+ replaceAll(jsonData.data[i].contact,"#nr#","<br>") +"</td>"+
 	    "</tr>");
+	 	$("#output").append(
+	 	 "<tr>" +
+	 	"<td colspan = '9'><div id = \"map" + nm + "\"></div></td></tr>"
+	 	 );
 	}
 }
 
@@ -112,20 +131,24 @@ function replaceAll(expression, s1, s2){
 }
 
 //地図の描画
-function drawMap(lng,lat,place) {
+function drawMap(lng,lat,mapId) {
+	//alert('1111');
 	var latlng = new google.maps.LatLng(lng,lat );
 	var myOptions = {
 		zoom : 16,
 		center : latlng,
 		mapTypeId : google.maps.MapTypeId.ROADMAP
 	};
-	var map = new google.maps.Map(document.getElementById('gmap'),
+
+	var map = new google.maps.Map(document.getElementById(mapId),
 			myOptions);
 
 	var marker = new google.maps.Marker({
 		position : latlng,
 		map : map
 	});
+
+	$('#' + mapId).css('width', '600px').css('height', '400px');
 }
 
 </script>
