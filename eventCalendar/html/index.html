@@ -130,26 +130,29 @@ function replaceAll(expression, s1, s2){
 }
 
 //地図の描画
-function drawMap(lng,lat,mapId) {
-	//alert('1111');
-	var latlng = new google.maps.LatLng(lng,lat );
-	var myOptions = {
-		zoom : 16,
-		center : latlng,
-		mapTypeId : google.maps.MapTypeId.ROADMAP
-	};
 
-	var map = new google.maps.Map(document.getElementById(mapId),
-			myOptions);
+	function drawMap(lng, lat, mapId) {
+		//alert('1111');
 
-	var marker = new google.maps.Marker({
-		position : latlng,
-		map : map
-	});
+		var mapDivObj = $('#' + mapId);
+		// マップDIVのサイズを決める。マップ構築前にやらないとサイズが取れない。
+		mapDivObj.css('width', '600px').css('height', '400px');
 
-	$('#' + mapId).css('width', '600px').css('height', '400px');
-}
+		var latlng = new google.maps.LatLng(lng, lat);
+		var myOptions = {
+			zoom : 16,
+			center : latlng,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		};
 
+		var map = new google.maps.Map(document.getElementById(mapId), myOptions);
+
+		var marker = new google.maps.Marker({
+			position : latlng,
+			map : map
+		});
+
+	}
 </script>
 </body>
 </html>
